@@ -58,6 +58,28 @@ try:
     assert 'P1 WINS!' in row(p, 16), row(p, 16)
     p.screen.image.save(rom.parent / 'gameplay-test.png')
     start(p)
-    print('PASS: header, title, start, hold rejection, tie, P1 win, rematch')
+    p.stop(save=False)
+    p = PyBoy(str(rom), window='null')
+    p.set_emulation_speed(0)
+    p.tick(120)
+    for title in ('JAVELIN THROW', 'SHOT PUT'):
+        press_pair(p, ['select'], 5)
+        p.tick(60)
+        assert title in row(p, 1), row(p, 1)
+        press_pair(p, ['start'], 30)
+        for player in range(2):
+            for i in range(20):
+                press_pair(p, ['a'] if i % 2 == 0 else ['b'], 6)
+            p.tick(120)
+            assert 'A:THROW' in row(p, 16), row(p, 16)
+            press_pair(p, ['a'], 5)
+            p.tick(90)
+            if player == 0:
+                assert 'NEXT PLAYER' in row(p, 16), row(p, 16)
+                press_pair(p, ['start'], 30)
+            else:
+                assert 'TIE!' in row(p, 16) or 'WINS!' in row(p, 16), row(p, 16)
+        p.screen.image.save(rom.parent / ('javelin-test.png' if title == 'JAVELIN THROW' else 'shot-put-test.png'))
+    print('PASS: sprint, held inputs, tie, win, rematch, javelin and shot put')
 finally:
     p.stop(save=False)

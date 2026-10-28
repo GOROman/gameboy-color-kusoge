@@ -55,3 +55,7 @@ The GB Studio CLI build was not completed because the original development machi
 Automated tests cover boot, start, held-input rejection, tied finishes, a Player 1 win, and rematches. The original cartridge write and readback matched. Emulator tests do not verify physical display, controls, or audio.
 
 Third-party cartridge dumps and save files are not included. See [LICENSE](LICENSE) for licensing.
+
+## Javelin and shot put
+
+Press SELECT on the idle/results screen to cycle through sprint, javelin, and shot put. START begins. Players take turns: alternate A/B to charge, adjust the angle with LEFT/RIGHT, then press A to throw. Aim near 45 degrees. START advances to the next player; longest distance wins.

@@ -18,11 +18,11 @@ Game Boy Color / ModRetro Chromatic 向けのオリジナル連打ゲーム **DA
 
 ## ROM
 
-[dist/dash-duel.gbc](dist/dash-duel.gbc) が書き込み・読み戻し一致を確認した32 KiB版です。Game Boy Color専用です。
+[dist/dash-duel.gbc](dist/dash-duel.gbc) が3種目を収録した32 KiB版です。Game Boy Color専用です。
 
 SHA-256:
 ```
-f19e966c6ddb508d4d24b4882014f116ebb37c16c6d13743e248c909be40fe78
+b6b1078343b1696ecea55325c3b58fb0a6b43e6005339ffaa2dddbcf95b8370c
 ```
 
 PyBoyで開始、交互入力、100mゴール、同着・結果表示を確認済み。Chromaticのカートリッジ書き込み検証成功。実機画面での最新版の起動確認は別途必要です。
@@ -58,3 +58,7 @@ GB Studio用のプロジェクトも保持していますが、GB Studio CLIの�
 python3 -m pip install pyboy==2.7.0 pillow==12.3.0
 python3 scripts/test_rom.py build/dash-duel.gbc
 ```
+
+## やり投げ・砲丸投げ
+
+待機・結果画面でSELECTを押すと、100m走 → やり投げ → 砲丸投げを切り替えます。STARTで開始。投てきは1P・2Pの順に同じ操作で対戦します。A/B交互連打でパワーをため、左右で角度を調整し、Aで投げます。45度を狙うと遠くまで飛びます。STARTで次の選手へ進み、飛距離で勝敗を決めます。

@@ -1,3 +1,7 @@
+## New in v0.2.0
+
+Javelin and shot put added. SELECT chooses the event. Take turns charging with A/B, aiming with LEFT/RIGHT, and throwing with A. START advances to the next player.
+
 ## DASH // DUEL
 
 An original, one-console, two-player 100-meter sprint for Game Boy Color and ModRetro Chromatic.

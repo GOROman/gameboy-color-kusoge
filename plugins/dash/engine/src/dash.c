@@ -32,11 +32,25 @@ text(0,17,"P1 < >    P2 A B");SHOW_BKG;SHOW_SPRITES;DISPLAY_ON;}
 static void reset_race(void){uint8_t i;for(i=0;i<2;i++){dist[i]=0;vel[i]=0;last[i]=0;pose[i]=0;finish[i]=0;}ticks=0;countdown=180;state=1;text(3,16,"      3       ");beep(0);}
 static void runner(uint8_t i){uint8_t j,x=16+(((dist[i]>>8)*7)>>3),y=i?112:80,t=(pose[i]&3)*12;
 for(j=0;j<6;j++){set_sprite_tile(i*6+j,t+j*2);move_sprite(i*6+j,x+(j%3)*8,y+(j/3)*16);}}
+static uint8_t event_id,turn,power,angle,throw_last,flight;
+static uint16_t throw_clock,marks[2];
+static const unsigned char projectile[]={0,0,0,0,0,0,255,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24,24,60,60,60,60,24,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+static void event_title(void){text(0,1,"                    ");text(3,1,event_id==0?"100M SPRINT":event_id==1?"JAVELIN THROW":"SHOT PUT");text(0,17,"SELECT:EVENT START:GO");}
+static void throw_begin(void){uint8_t j;power=0;angle=45;throw_last=0;throw_clock=0;state=4;dist[0]=dist[1]=0;pose[0]=pose[1]=0;screen();event_title();for(j=0;j<12;j++)move_sprite(j,0,0);runner(turn);text(0,16,turn?"P2: A/B CHARGE!":"P1: A/B CHARGE!");text(0,17,"ALTERNATE A/B 3 SEC");text(2,4,"POWER");text(12,4,"ANGLE");number(2,5,0);number(12,5,angle);set_sprite_data(48,4,projectile);set_sprite_prop(12,turn);}
+static void throw_update(uint8_t keys,uint8_t edge){uint8_t k,quality,x,y;uint16_t arc;
+if(state==4){throw_clock++;k=edge&(J_A|J_B);if(k&&k!=(J_A|J_B)&&k!=throw_last){throw_last=k;if(power<96)power+=4;pose[turn]++;}if(event_id==1)dist[turn]=(uint16_t)power*100;runner(turn);if((throw_clock&7)==0)number(2,5,power);if(throw_clock>=180){state=5;text(0,16,"L/R: ANGLE  A:THROW");text(0,17,"AIM NEAR 45 DEGREES");}}
+else if(state==5){if((keys&J_LEFT)&&angle>10)angle--;if((keys&J_RIGHT)&&angle<80)angle++;number(12,5,angle);if(edge&J_A){quality=90-(angle>45?angle-45:45-angle)*2;marks[turn]=event_id==1?((uint16_t)(power+15)*quality/100):((uint16_t)(power+15)*quality/400);flight=0;state=6;beep(1);text(0,16,"       THROW!       ");}}
+else if(state==6){flight++;x=40+(uint16_t)flight*marks[turn]/100;arc=(uint16_t)flight*(60-flight)/24;y=(turn?119:87)-(arc>65?65:arc);set_sprite_tile(12,event_id==1?48:50);move_sprite(12,x,y);if(flight>=60){move_sprite(12,x,turn?119:87);text(turn?12:2,4,"     ");number(turn?12:2,4,marks[turn]);text(turn?15:5,4,"M");state=7;text(0,16,"START: NEXT PLAYER");if(turn){text(0,17,"SELECT: CHANGE EVENT");text(0,16,marks[0]==marks[1]?"TIE! START AGAIN":marks[0]>marks[1]?"P1 WINS! START AGAIN":"P2 WINS! START AGAIN");}}}
+else if(state==7&&(edge&J_START)){if(!turn){turn=1;throw_begin();text(2,4,"     ");number(2,4,marks[0]);text(5,4,"M");}else{turn=0;throw_begin();}}
+}
 void dash_duel(SCRIPT_CTX *THIS) OLDCALL BANKED {
 uint8_t keys,edge,i,k; (void)THIS;
-cpu_fast();NR52_REG=0x80;NR50_REG=0x77;NR51_REG=0xff;screen();state=0;dist[0]=dist[1]=0;pose[0]=pose[1]=0;oldkeys=joypad();text(2,16,"START TO RACE!");
+cpu_fast();NR52_REG=0x80;NR50_REG=0x77;NR51_REG=0xff;screen();state=0;dist[0]=dist[1]=0;pose[0]=pose[1]=0;oldkeys=joypad();text(2,16,"START TO RACE!");event_title();
 while(1){wait_vbl_done();SCX_REG=0;SCY_REG=0;keys=joypad();edge=keys&~oldkeys;oldkeys=keys;
-if((state==0||state==3)&&(edge&J_START))reset_race();
+if((state==0||state==3||state==7)&&(edge&J_SELECT)){event_id=(event_id+1)%3;state=0;screen();event_title();text(2,16,"START TO PLAY!");}
+if(state==0&&(edge&J_START)&&event_id){turn=0;marks[0]=marks[1]=0;throw_begin();}
+else if((state==0||state==3)&&(edge&J_START))reset_race();
+if(state>=4){throw_update(keys,edge);continue;}
 if(state==1){countdown--;if(countdown==120){text(8,16,"  2  ");beep(0);}if(countdown==60){text(8,16,"  1  ");beep(0);}if(!countdown){state=2;text(3,16,"     GO!      ");beep(1);}}
 else if(state==2){ticks++;for(i=0;i<2;i++){k=i?(edge&(J_A|J_B)):(edge&(J_LEFT|J_RIGHT));if(k && k!=(i?(J_A|J_B):(J_LEFT|J_RIGHT)) && k!=last[i] && !finish[i]){last[i]=k;vel[i]=vel[i]>48?64:vel[i]+16;pose[i]++;}if(!finish[i]){if(vel[i])vel[i]--;dist[i]+=vel[i];if(dist[i]>=32768u){dist[i]=32768u;finish[i]=ticks;beep(1);}}}
 if(finish[0]&&finish[1]){number(2,5,100);number(12,5,100);timer(2,4,finish[0]);timer(12,4,finish[1]);state=3;if(finish[0]==finish[1])text(3,16,"TIE! START AGAIN");else text(2,16,finish[0]<finish[1]?"P1 WINS!  START":"P2 WINS!  START");}
