@@ -1,5 +1,7 @@
 # gameboy-color-kusoge
 
+**日本語** · [English (US)](README.en-US.md) · [简体中文](README.zh-CN.md)
+
 Game Boy Color / ModRetro Chromatic 向けのオリジナル連打ゲーム **DASH // DUEL**。
 1台を2人で持って、100m走で対戦します。
 
@@ -45,3 +47,14 @@ GBDK_LCC=/path/to/gbdk/bin/lcc python3 scripts/build.py
 GB Studio用のプロジェクトも保持していますが、GB Studio CLIのビルドは作業環境の空き容量不足で完了していません。配布ROMは上記GBDKの直接ビルドで作成しています。
 
 第三者ゲームの吸い出しROMやセーブデータは含めていません。
+
+## CI/CDとリリース
+
+`main`へのpush・Pull RequestでROMをビルドし、PyBoyで起動、長押しの扱い、同着、1P勝利、再戦を自動テストします。`v*`タグのpushでは、テスト成功後にGitHub ReleaseへROM・SHA256SUMS・ゲーム画面を公開します。
+
+[最新版のダウンロード](https://github.com/GOROman/gameboy-color-kusoge/releases/latest)
+
+```sh
+python3 -m pip install pyboy==2.7.0 pillow==12.3.0
+python3 scripts/test_rom.py build/dash-duel.gbc
+```
