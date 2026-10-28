@@ -1,0 +1,11 @@
+.DS_Store
+.tmp/
+build/
+artifacts/
+__pycache__/
+*.pyc
+*.sav
+*.state
+*.log
+.env
+.env.*
